@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/contentTemplate}">
+<head>
+    <title th:text="#{login.title}">Title</title>
+</head>
+<body>
+
+<div layout:fragment="contentDiv">
+
+    <div class="container content-space-t-1 content-space-b-2">
+        <div class="mx-lg-auto" style="max-width: 55rem;">
+            <div class="d-flex justify-content-center align-items-center flex-column min-vh-75">
+
+                <div class="position-relative">
+                    <!-- Card -->
+                    <div class="card card-shadow card-login">
+                        <div class="row">
+                            <div class="col-auto">
+                                <div class="card-body">
+                                    <!-- Form -->
+                                    <form method="post" role="form" th:action="@{/login}">
+                                        <div class="text-center">
+                                            <div class="mb-5">
+                                                <h3 class="card-title" th:text="#{login.title}">Login to IH</h3>
+                                            </div>
+                                        </div>
+
+                                        <div th:if="${param.error}">
+                                            <div class="alert alert-danger" th:text="#{login.invalid}">Invalid Username or Password</div>
+                                        </div>
+
+                                        <!-- Form -->
+                                        <div class="mb-4">
+                                            <label class="form-label" for="username" th:text="#{login.username}">Your email</label>
+                                            <input class="form-control form-control-lg" name="username" id="username"
+                                                   required>
+                                        </div>
+                                        <!-- End Form -->
+
+                                        <!-- Form -->
+                                        <div class="mb-4">
+                                            <label class="form-label" for="password"
+                                                   th:text="#{login.password}">Password</label>
+
+                                            <div class="input-group-merge">
+                                                <input type="password"
+                                                       class="js-toggle-password form-control form-control-lg"
+                                                       name="password" id="password" required>
+                                            </div>
+                                        </div>
+                                        <!-- End Form -->
+
+                                        <div class="d-grid gap-4">
+                                            <button type="submit" class="btn btn-primary btn-lg" th:text="#{login.title}">Sign in</button>
+                                        </div>
+                                    </form>
+                                    <!-- End Form -->
+                                </div>
+                            </div>
+                            <!-- End Col -->
+                        </div>
+                        <!-- End Row -->
+                    </div>
+                    <!-- End Card -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
