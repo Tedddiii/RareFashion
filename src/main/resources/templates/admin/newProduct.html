@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/adminTemplate}">
+
+<head>
+</head>
+
+<body>
+
+<div layout:fragment="contentDiv">
+    <div class="container mt-2">
+        <div class="row mb-5 pb-5">
+            <div class="col-12 text-center">
+                <h2>New product</h2>
+            </div>
+        </div>
+
+        <div class="row justify-content-md-center mb-5">
+            <div class="col-auto">
+
+                <form id="productForm" th:action="@{/admin/products/new}" th:object="${productForm}" method="post">
+
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="E.g. t-shirt"/>
+                        <small><span th:errors="*{name}" class="form-text" style="color: darkred"></span></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select class="form-control" id="category" th:field="*{category.id}">
+                            <option th:each="c : ${categoriesList}" th:value="${c.id}" th:text="${c.name}"/>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image">Image file</label>
+                        <select class="form-control" id="image" th:field="*{imageFile}">
+                            <option value="product-1.jpg">product-1.jpg</option>
+                            <option value="product-2.jpg">product-2.jpg</option>
+                            <option value="product-3.jpg">product-3.jpg</option>
+                            <option value="product-4.jpg">product-4.jpg</option>
+                            <option value="product-5.jpg">product-5.jpg</option>
+                            <option value="product-6.jpg">product-6.jpg</option>
+                            <option value="product-7.jpg">product-7.jpg</option>
+                            <option value="product-8.jpg">product-8.jpg</option>
+                            <option value="product-9.jpg">product-9.jpg</option>
+                            <option value="product-10.jpg">product-10.jpg</option>
+                            <option value="product-11.jpg">product-11.jpg</option>
+                            <option value="product-12.jpg">product-12.jpg</option>
+                            <option value="product-13.jpg">product-13.jpg</option>
+                            <option value="product-14.jpg">product-14.jpg</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save product</button>
+                    <a class="btn btn-dark" th:href="@{/admin/products}">Cancel</a>
+                </form>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+</body>
+</html>

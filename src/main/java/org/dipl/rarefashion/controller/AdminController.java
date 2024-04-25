@@ -1,86 +1,86 @@
 package org.dipl.rarefashion.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dipl.rarefashion.controller.temp.ProductsFilter;
+import org.dipl.rarefashion.entity.Product;
+import org.dipl.rarefashion.repository.CategoriesRepository;
+import org.dipl.rarefashion.repository.ProductsRepository;
+import org.dipl.rarefashion.service.ProductsService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Optional;
 
 @Controller
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
 
-/*
-    private final EventsService eventsService;
-    private final EnrollRepository enrollRepository;
-    private final Utils utils;
-*/
+    private final ProductsService productsService;
+    private final CategoriesRepository categoriesRepository;
+    private final ProductsRepository productsRepository;
+
+    @GetMapping
+    public String adminIndex(Model model) {
+
+        model.addAttribute("activeMenu", "home");
+        return "admin/home";
+    }
 
     @GetMapping(path = "/products")
     public String general(Model model) {
 
-        model.addAttribute("activeMenu", "general");
+        model.addAttribute("activeMenu", "products");
+        model.addAttribute("productsList", productsService.getAllProducts());
 
         return "admin/products";
     }
 
-/*
-    @GetMapping(path = "/events")
-    public String events(@RequestParam(name = "p", defaultValue = "1") Integer pageIndex,
-                         @RequestParam(name = "i", defaultValue = "5") Integer itemsPerPage,
-                         @ModelAttribute("filterForm") EventsFilter filterForm,
-                         Model model) {
+    @GetMapping(path = "/products/{id}/delete")
+    public String deleteProduct(@PathVariable Integer id, Model model) {
 
-        utils.initEventsFilter(filterForm);
-        Pageable pageable = PageRequest.of(pageIndex - 1, itemsPerPage);
-        PageWrapper<EventDto> pageWrp = new PageWrapper<>(eventsService.getEventsDtoWithEnrollments(pageable), null);
-        model.addAttribute("page", pageWrp);
-        model.addAttribute("activeMenu", "events");
+        productsService.deleteProduct(id);
 
-        return "admin/events";
+        return "redirect:/admin/products";
     }
 
-    @GetMapping(path = "/events/prepareDeleteEnroll")
-    public String prepareDeleteEnroll(@RequestParam(name = "enrollId") Integer enrollId, Model model) {
+    @GetMapping(path = "/products/new")
+    public String newProduct(@ModelAttribute("productForm") Product productForm, Model model) {
 
-        log.info("Preparing delete enroll modal for enrollId: {}", enrollId);
+        model.addAttribute("activeMenu", "products");
+        model.addAttribute("categoriesList", categoriesRepository.findAll());
 
-        Optional<Enroll> enroll = enrollRepository.findById(enrollId);
-        String msg;
+        return "admin/newProduct";
+    }
 
-        if (enroll.isEmpty()) {
-            log.info("Enrollment not found for deletion: {}", enrollId);
-            msg = utils.getMessage("enroll.delete.notfound");
-        } else {
-            Event event = eventsService.getEvent(enroll.get().getEventId());
-            msg = utils.getMessage("enroll.delete.sure", enroll.get().getName(), event.getTitle());
-            model.addAttribute("eventId", event.getEventId());
+    @PostMapping(path = "/products/new")
+    public String newProduct(@ModelAttribute("productForm") @Valid Product productForm, BindingResult bindingResult,
+                             Model model) {
+
+        log.info("Saving new product: {}", productForm);
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("activeMenu", "products");
+            model.addAttribute("categoriesList", categoriesRepository.findAll());
+            return "admin/newProduct";
         }
 
-        model.addAttribute("deleteMessage", msg);
-        model.addAttribute("enrollId", enrollId);
-        return "admin/fragments :: #divModalDeleteEnrollContent";
+        Product product = productsRepository.save(productForm);
+
+        log.info("Saved product: {}", product);
+
+        return "redirect:/admin/products";
     }
-
-    @DeleteMapping(path = "/events/deleteEnroll")
-    @ResponseBody
-    public String deleteEnroll(@RequestParam(name = "enrollId") Integer enrollId) {
-
-        log.info("Deleting enrollId: {}", enrollId);
-
-        Optional<Enroll> enroll = enrollRepository.findById(enrollId);
-
-        if (enroll.isPresent()) {
-            enrollRepository.deleteById(enrollId);
-            return enroll.get().getEventId();
-        }
-
-        return "OK";
-    }
-*/
 }

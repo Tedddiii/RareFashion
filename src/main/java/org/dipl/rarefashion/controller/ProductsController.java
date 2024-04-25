@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dipl.rarefashion.controller.temp.ProductsFilter;
 import org.dipl.rarefashion.entity.Product;
-import org.dipl.rarefashion.service.ProductService;
+import org.dipl.rarefashion.service.ProductsService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,78 +25,25 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequiredArgsConstructor
 public class ProductsController {
 
-    private final ProductService productsService;
+    private final ProductsService productsService;
 
-    @GetMapping(path = "/products/save")
-    @ResponseBody
-    public String save() {
+    @GetMapping(path = "/products/show/{id}")
+    public String getProduct(@PathVariable Integer id, Model model) {
 
-        //productsService.savePoduct(Product.builder().name("test").build());
-        return "OK";
-    }
+        Product product = productsService.getProductById(id);
 
-    @GetMapping(path = "/products/{productId}")
-    @ResponseBody
-    public Product getProduct(@PathVariable Integer productId) {
+        model.addAttribute("activeMenu", "products");
+        model.addAttribute("product", product);
 
-        return productsService.getProductById(productId);
+        return "showProduct";
     }
 
     @RequestMapping(path = "/products", method = {RequestMethod.GET})
-    public String events(@RequestParam(name = "p", defaultValue = "1") Integer pageIndex,
-                         @RequestParam(name = "i", defaultValue = "20") Integer itemsPerPage,
-                         @ModelAttribute("filterForm") ProductsFilter filterForm,
-                         Model model) {
+    public String products(Model model) {
 
-/*
-        Pageable pageable = PageRequest.of(pageIndex - 1, itemsPerPage);
-        PageWrapper<Product> pageWrp = new PageWrapper<>(productsService.getProducts(pageable, filterForm));
-        model.addAttribute("page", pageWrp);
         model.addAttribute("activeMenu", "products");
-*/
+        model.addAttribute("productsList", productsService.getAllProducts());
 
         return "products";
     }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping(path = "/products/saveProduct")
-    public String saveProduct(@ModelAttribute("productForm") @Valid Product productForm,
-                              BindingResult bindingResult, Model model) {
-
-        log.info("Saving product request: {}", productForm);
-
-        if (bindingResult.hasErrors()) {
-            log.debug("Errors in product form: {}", bindingResult.getAllErrors());
-            return "products/fragments :: #divModalProductContent";
-        }
-
-        try {
-            productsService.savePoduct(productForm);
-            model.addAttribute("saveSuccess", true);
-        } catch (Exception e) {
-            log.error("Error saving product!", e);
-            throw e;
-        }
-
-        return "products/fragments :: #divModalProductContent";
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping(path = "/products/deleteProduct")
-    @ResponseBody
-    public String deleteProduct(@RequestParam(name = "productId") Integer productId) {
-
-        log.info("Deleting productId: {}", productId);
-
-/*
-        Optional<Product> product = productsRepository.findById(productId);
-
-        if (product.isPresent()) {
-            productsRepository.deleteById(productId);
-        }
-*/
-
-        return "OK";
-    }
-
 }

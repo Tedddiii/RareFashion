@@ -6,12 +6,22 @@ import org.dipl.rarefashion.entity.Product;
 import org.dipl.rarefashion.repository.ProductsRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProductService {
+public class ProductsService {
 
     private final ProductsRepository productsRepository;
+
+    public List<Product> getAllProducts() {
+        return productsRepository.findAll();
+    }
+
+    public void deleteProduct(int id) {
+        productsRepository.deleteById(id);
+    }
 
     public void savePoduct(Product product) {
         Product p = productsRepository.save(product);

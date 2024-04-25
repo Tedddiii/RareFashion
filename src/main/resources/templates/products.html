@@ -1,10 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{templates/contentTemplate}">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Products</title>
 </head>
 <body>
 
+<div layout:fragment="contentDiv">
+
+    <div class="container">
+        <div class="row">
+            <div th:each="p : ${productsList}" class="col-lg-4 col-md-6 col-sm-6">
+                <div class="product__item">
+                    <div class="product__item__pic set-bg" data-setbg="img/product/product-2.jpg"
+                         th:attr="data-setbg=${'img/product/' + p.imageFile}">
+                    </div>
+                    <div class="product__item__text">
+                        <h6 th:text="${p.name}" class="text-primary">Piqué Biker Jacket</h6>
+                        <a th:href="@{/products/show/{id}(id=${p.getId()})}" class="add-cart">Show</a>
+                        <div class="rating">
+                            <h6 th:text="${p.category.name}" class="text-success">Shirts</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

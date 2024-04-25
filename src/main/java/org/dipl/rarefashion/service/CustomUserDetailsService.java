@@ -2,8 +2,10 @@ package org.dipl.rarefashion.service;
 
 import lombok.RequiredArgsConstructor;
 import org.dipl.rarefashion.entity.User;
+import org.dipl.rarefashion.model.LoggedUser;
 import org.dipl.rarefashion.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,12 +27,10 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException(username);
         }
 
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.withDefaultPasswordEncoder()
-                .username(username)
-                .password(user.getPassword())
-                .roles(user.getRoles().stream().map(r -> r.getRoleId()).toArray(String[]::new))
-                .build();
+        LoggedUser loggedUser = new LoggedUser(username, user.getPassword(),
+                user.getRoles().stream().map(r -> new SimpleGrantedAuthority(r.getRoleId())).toList());
+        loggedUser.setName(user.getName());
 
-        return userDetails;
+        return loggedUser;
     }
 }

@@ -5,20 +5,21 @@ import jakarta.servlet.http.HttpSessionEvent;
 import jakarta.servlet.http.HttpSessionListener;
 import lombok.extern.slf4j.Slf4j;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
@@ -72,18 +73,15 @@ public class WebConfig implements WebMvcConfigurer {
     }
 */
 
-/*
     @Bean
     public MessageSource messageSource() {
 
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-//        messageSource.setBasenames("classpath:/messages", "classpath:/prices");
         messageSource.setBasenames("classpath:/messages");
         messageSource.setDefaultEncoding("UTF-8");
 
         return messageSource;
     }
-*/
 
 /*
     @Bean
@@ -98,6 +96,7 @@ public class WebConfig implements WebMvcConfigurer {
 
         SpringTemplateEngine engine = new SpringTemplateEngine();
         engine.addDialect(new LayoutDialect());
+        engine.addDialect(new SpringSecurityDialect());
 //        engine.addDialect(new Java8TimeDialect());
         engine.setTemplateResolver(templateResolver);
         return engine;
@@ -113,7 +112,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers(permit_urls).permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/actuator/**").authenticated()
                         .anyRequest().denyAll()
                 )
@@ -122,29 +121,25 @@ public class WebConfig implements WebMvcConfigurer {
                         .permitAll()
                         .defaultSuccessUrl("/")
                 )
-                .logout((logout) -> logout.logoutSuccessUrl("/"));
-
-        //.sessionManagement(session -> session.maximumSessions(3));
+                .logout((logout) -> logout.logoutSuccessUrl("/"))
+                .sessionManagement(configurer -> configurer
+                        .sessionFixation().migrateSession()
+                        .maximumSessions(3)
+                        .maxSessionsPreventsLogin(true)
+                        .expiredUrl("/login?expired"));
 
         return http.build();
     }
 
-/*
     @Bean
-    public UserDetailsService userDetailsService() {
+    public PasswordEncoder passwordEncoder() {
 
-        UserDetails user = User.withDefaultPasswordEncoder()
-                .username("ih")
-                .password("ih4488")
-                .roles("ADMIN2")
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
+        return new BCryptPasswordEncoder();
     }
-*/
 
     @Bean
     public MappingJackson2HttpMessageConverter createMappingJacksonHttpMessageConverter(ObjectMapper objectMapper) {
+
         var converter = new MappingJackson2HttpMessageConverter();
         converter.setObjectMapper(objectMapper);
         return converter;
@@ -159,6 +154,8 @@ public class WebConfig implements WebMvcConfigurer {
             public void sessionCreated(HttpSessionEvent se) {
 
                 log.info("Session created: " + se.getSession().getId());
+                se.getSession().getAttributeNames().asIterator().forEachRemaining(name ->
+                        log.info("Attribute: " + name + " = " + se.getSession().getAttribute(name)));
             }
 
             @Override
