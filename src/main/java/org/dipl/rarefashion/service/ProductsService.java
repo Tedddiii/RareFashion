@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dipl.rarefashion.entity.Product;
 import org.dipl.rarefashion.repository.ProductsRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public class ProductsService {
     private final ProductsRepository productsRepository;
 
     public List<Product> getAllProducts() {
-        return productsRepository.findAll();
+        return productsRepository.findAll(Sort.by("id").descending());
     }
 
     public void deleteProduct(int id) {

@@ -40,4 +40,8 @@ public class Product {
     @Size(max = 100)
     @Column(name = "image_file", length = 100)
     private String imageFile;
+
+    @Size(max = 500)
+    @Column(name = "description", length = 500)
+    private String description;
 }
